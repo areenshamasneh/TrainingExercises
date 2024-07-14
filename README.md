@@ -1,1 +1,3 @@
 # PythonExercises
+
+Exercises repository
