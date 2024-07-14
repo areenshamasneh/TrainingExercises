@@ -1,1 +1,3 @@
 # PythonExercises
+
+Python Exercises repo
