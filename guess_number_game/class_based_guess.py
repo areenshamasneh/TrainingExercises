@@ -10,14 +10,36 @@ class Number:
         # Randomly generate a number to guess within the defined range
         self.value = random.randint(self.MIN_VALUE, self.MAX_VALUE)
 
-    def is_close(self, guess):
-        # Check if the guessed number is within the proximity threshold
-        return abs(guess - self.value) <= self.PROXIMITY_THRESHOLD
-
 
 class Checker:
-    @staticmethod
-    def is_valid(guess):
+    def __init__(self, number):
+        self.number = number
+
+    def is_close(self, guess):
+        # Check if the guessed number is within the proximity threshold
+        return abs(guess - self.number.value) <= Number.PROXIMITY_THRESHOLD
+
+    def is_guessed(self, guess):
+        # Check if the guessed number is correct
+        return guess == self.number.value
+
+    def higher_or_lower(self, guess):
+        # Determine if the guess is higher or lower than the target number
+        return "higher" if guess < self.number.value else "lower"
+
+
+class Validation:
+    def validate_guess_type(self, guess):
+        # Validate that the input can be converted to an integer
+        try:
+            int(guess)
+            return True
+        except ValueError:
+            return False
+
+    def validate_guess_bounds(self, guess):
+        # Validate that the guess is within the allowed range
+        guess = int(guess)
         return Number.MIN_VALUE <= guess <= Number.MAX_VALUE
 
 
@@ -33,62 +55,54 @@ class IO:
         "lower": "Lower!",
     }
 
-    @staticmethod
-    def get_guess():
-        while True:
-            try:
-                guess = int(input(IO.MESSAGES["welcome"]()))
-                return guess
-            except ValueError:
-                print(IO.MESSAGES["invalid_input"])
+    def get_guess(self):
+        # Prompt the user for their guess
+        return input(self.MESSAGES["welcome"]())
 
     @staticmethod
     def print_message(message):
         print(message)
 
 
-class Validation:
-    @staticmethod
-    def validate_guess(guess):
-        if not Checker.is_valid(guess):
-            IO.print_message(IO.MESSAGES["out_of_bounds"]())
-            return False
-        return True
-
-
 class Game:
     def __init__(self):
-        # Create a new Number instance for the game
         self.number = Number()
-        self.is_running = True  # Track the game's running status
+        self.checker = Checker(self.number)
+        self.validation = Validation()
+        self.io = IO()
+        self.is_running = True
 
     def provide_feedback(self, guess):
-        # Provide feedback based on the user's guess
-        if guess == self.number.value:
-            self.is_running = False
-            return IO.MESSAGES["congratulations"](self.number.value)
+        guess = int(guess)  # Convert the guess to an integer
+        if self.checker.is_guessed(guess):
+            self.is_running = False  # End the game if the guess is correct
+            return self.io.MESSAGES["congratulations"](self.number.value)
 
-        if self.number.is_close(guess):
+        if self.checker.is_close(guess):
             return (
-                IO.MESSAGES["very_close_higher"]
+                self.io.MESSAGES["very_close_higher"]
                 if guess < self.number.value
-                else IO.MESSAGES["very_close_lower"]
+                else self.io.MESSAGES["very_close_lower"]
             )
 
-        return (
-            IO.MESSAGES["higher"] if guess < self.number.value else IO.MESSAGES["lower"]
-        )
+        return self.io.MESSAGES[self.checker.higher_or_lower(guess)]
 
     def play(self):
         while self.is_running:
-            guess = IO.get_guess()
-            if Validation.validate_guess(guess):
-                feedback = self.provide_feedback(guess)
-                IO.print_message(feedback)
+            guess = self.io.get_guess()  # Get the user's guess
+            if not self.validation.validate_guess_type(guess):
+                self.io.print_message(self.io.MESSAGES["invalid_input"])
+                continue
+            guess = int(guess)  # Convert guess to integer
+            if not self.validation.validate_guess_bounds(guess):
+                self.io.print_message(self.io.MESSAGES["out_of_bounds"]())
+                continue
+            feedback = self.provide_feedback(guess)  # Get feedback for the guess
+            self.io.print_message(feedback)
 
 
 def main():
-    # Loop to allow the user to play multiple times
+    # Allow the user to play multiple times
     while True:
         game = Game()
         game.play()
