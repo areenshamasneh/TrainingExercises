@@ -22,50 +22,57 @@ MESSAGES = {
 def get_guess():
     while True:
         try:
-            # Request user input and convert it to an integer
             guess = int(input(MESSAGES["welcome"]()))
-            # Check if the guess is within the valid range
-            if guess < MIN_NUMBER or guess > MAX_NUMBER:
-                print(MESSAGES["out_of_bounds"])
+            if not validate_guess(guess):
                 continue
             return guess
         except ValueError:
             print(MESSAGES["invalid_input"])
 
 
+def validate_guess(guess):
+    """Validate if the guess is within the allowed range."""
+    if guess < MIN_NUMBER or guess > MAX_NUMBER:
+        print(MESSAGES["out_of_bounds"])
+        return False
+    return True
+
+
 def provide_feedback(guess, number_to_guess):
-    # Provide feedback based on the user's guess
     if guess == number_to_guess:
         return MESSAGES["congratulations"](number_to_guess)
 
-    difference = guess - number_to_guess  # Calculate the difference
+    return check_proximity(guess, number_to_guess)
 
-    # Provide proximity feedback if the guess is close
+
+def check_proximity(guess, number_to_guess):
+    """Check proximity and provide appropriate feedback."""
+    difference = guess - number_to_guess
     if abs(difference) <= PROXIMITY_THRESHOLD:
         return MESSAGES["feedback"][
             "very_close_higher" if difference < 0 else "very_close_lower"
         ]
+    return check_direction(guess, number_to_guess)
 
-    # Provide higher/lower feedback based on the guess
-    return MESSAGES["feedback"]["higher" if difference < 0 else "lower"]
+
+def check_direction(guess, number_to_guess):
+    """Check if the guess is higher or lower than the target number."""
+    return MESSAGES["feedback"]["higher" if guess < number_to_guess else "lower"]
 
 
 def play_game():
-    # Randomly generate the number to guess
     number_to_guess = random.randint(MIN_NUMBER, MAX_NUMBER)
 
     while True:
-        guess = get_guess()  # Get a guess from the user
+        guess = get_guess()
         feedback = provide_feedback(guess, number_to_guess)
         print(feedback)
 
-        # Check if the guess is correct to end the game
         if guess == number_to_guess:
             break
 
 
 def main():
-    # Loop to allow the user to play multiple times
     while True:
         play_game()
         play_again = input("Do you want to play again? (yes/no): ").strip().lower()
