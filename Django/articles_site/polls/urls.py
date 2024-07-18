@@ -1,6 +1,7 @@
 from django.urls import path, register_converter
 from . import views
 from .converters import YearConverter
+from debug_toolbar.toolbar import debug_toolbar_urls # type: ignore
 
 register_converter(YearConverter, 'yyyy')
 
@@ -12,4 +13,4 @@ urlpatterns = [
          views.articles_by_month, name='articles_by_month'),
     path('articles/<yyyy:year>/<int:month>/<slug:slug>/',
          views.article_detail, name='article_detail'),
-]
+] + debug_toolbar_urls()
