@@ -19,29 +19,25 @@ MESSAGES = {
 }
 
 
-def get_guess():
-    while True:
-        try:
-            guess = int(input(MESSAGES["welcome"]()))
-            if not validate_guess(guess):
-                continue
-            return guess
-        except ValueError:
-            print(MESSAGES["invalid_input"])
+def get_input(prompt):
+    return input(prompt)
 
 
 def validate_guess(guess):
     """Validate if the guess is within the allowed range."""
+    if not guess.isdigit():
+        print(MESSAGES["invalid_input"])
+        return None
+    guess = int(guess)
     if guess < MIN_NUMBER or guess > MAX_NUMBER:
         print(MESSAGES["out_of_bounds"])
-        return False
-    return True
+        return None
+    return guess
 
 
 def provide_feedback(guess, number_to_guess):
     if guess == number_to_guess:
         return MESSAGES["congratulations"](number_to_guess)
-
     return check_proximity(guess, number_to_guess)
 
 
@@ -64,10 +60,11 @@ def play_game():
     number_to_guess = random.randint(MIN_NUMBER, MAX_NUMBER)
 
     while True:
-        guess = get_guess()
+        guess = None
+        while guess is None:
+            guess = validate_guess(get_input(MESSAGES["welcome"]()))
         feedback = provide_feedback(guess, number_to_guess)
         print(feedback)
-
         if guess == number_to_guess:
             break
 
@@ -75,8 +72,7 @@ def play_game():
 def main():
     while True:
         play_game()
-        play_again = input("Do you want to play again? (yes/no): ").strip().lower()
-        if play_again != "yes":
+        if input("Do you want to play again? (yes/no): ").strip().lower() != "yes":
             break
 
 
