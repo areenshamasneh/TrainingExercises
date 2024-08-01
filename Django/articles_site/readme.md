@@ -75,7 +75,11 @@ Visit `http://127.0.0.1:8000/articles/` in your web browser to see the applicati
    new_article = Article(year=2024, month=7, slug='new-article', title='New Article Title')
    new_article.save()
    ```
+3. Or use the following command to add a sample of articles:
 
+   ```
+   python manage.py add_articles
+   ```
 ## Database Configuration
 
 Before running the project, update your database configuration in `settings.py`:
